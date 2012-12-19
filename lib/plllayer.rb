@@ -21,11 +21,6 @@ class Plllayer
     at_exit { stop }
   end
 
-  def load(playlist = nil)
-    clear
-    append(playlist)
-  end
-
   def append(tracks)
     tracks = Array(tracks).dup
     tracks.select! { |track| track.respond_to?(:location) || (track.is_a?(String) && File.exists?(track)) }

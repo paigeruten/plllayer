@@ -27,18 +27,13 @@ A playlist is just an `Array` of tracks. A track is either a `String` containing
 
 A singleton playlist, with only one track, doesn't need to be in an `Array`. That's ugly. You can just pass a track object to any method that expects a playlist and it'll understand.
 
-To tell the `Plllayer` what playlist to play, either initialize the `Plllayer` with the playlist or use `Plllayer#load`:
+To tell the `Plllayer` what playlist to play, either initialize the `Plllayer` with the playlist or use `Plllayer#append`:
 
     player = Plllayer.new
-    player.load(playlist)
-
-If a playlist is already loaded, this will replace it. If the playlist being replaced is already playing, it'll be stopped.
+    player.append(playlist)
+    player << more_tracks    # the << operator is an alias for append
 
 The playlist can be accessed by `Plllayer#playlist`.
-
-To add tracks to the playlist while it's playing, use `Plllayer#append`, or the `<<` operator:
-
-    player << playlist
 
 The playlist can be shuffled using `Plllayer#shuffle`:
 
