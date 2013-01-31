@@ -27,42 +27,41 @@ class Plllayer
         # Make sure we're only playing one song at any one time.
         _quit
 
-        if File.exists? track_path
-          # Run the mplayer process in slave mode, passing it the location of
-          # the track's audio file.
-          cmd = ["mplayer", "-slave", "-quiet", track_path]
-          @pid, @stdin, @stdout, @stderr = Open4.popen4(*cmd)
+        # Make sure the audio file exists.
+        raise FileNotFoundError, "file '#{track_path}' doesn't exist" unless File.exists? track_path
 
-          # This should skip past mplayer's initial lines of output so we can
-          # start reading its replies to our commands.
-          until @stdout.gets["playback"]
-          end
+        # Run the mplayer process in slave mode, passing it the location of
+        # the track's audio file.
+        cmd = ["mplayer", "-slave", "-quiet", track_path]
+        @pid, @stdin, @stdout, @stderr = Open4.popen4(*cmd)
 
-          @paused = false
-          @track_path = track_path
-
-          # Persist the previous speed, volume, and mute properties into this
-          # process.
-          self.speed = @speed
-          self.volume = @volume
-          mute if @muted
-
-          # Start a thread that waits for the mplayer process to end, then calls
-          # the end of song callback. If the #quit method is called, this thread
-          # will be killed if it's still waiting for the process to end.
-          @quit_hook_active = false
-          @quit_hook = Thread.new do
-            Process.wait(@pid)
-            @quit_hook_active = true
-            @paused = false
-            @track_path = nil
-            on_end.call
-          end
-
-          true
-        else
-          false
+        # This should skip past mplayer's initial lines of output so we can
+        # start reading its replies to our commands.
+        until @stdout.gets["playback"]
         end
+
+        @paused = false
+        @track_path = track_path
+
+        # Persist the previous speed, volume, and mute properties into this
+        # process.
+        self.speed = @speed
+        self.volume = @volume
+        mute if @muted
+
+        # Start a thread that waits for the mplayer process to end, then calls
+        # the end of song callback. If the #quit method is called, this thread
+        # will be killed if it's still waiting for the process to end.
+        @quit_hook_active = false
+        @quit_hook = Thread.new do
+          Process.wait(@pid)
+          @quit_hook_active = true
+          @paused = false
+          @track_path = nil
+          on_end.call
+        end
+
+        true
       end
 
       def stop
@@ -201,8 +200,10 @@ class Plllayer
           _command "quit"
           @paused = false
           @track_path = nil
+          true
+        else
+          false
         end
-        true
       end
 
       # Check if the mplayer process is still around.

@@ -1,4 +1,7 @@
 class Plllayer
+  # Raise this exception when the file at the given track path doesn't exist.
+  FileNotFoundError = Class.new(ArgumentError)
+
   # A SinglePlayer takes care of playing a single track, and controlling the
   # playback with commands like pause, resume, seek, and so on. It probably
   # starts an external audio player process to do this job. This class is an
@@ -9,7 +12,7 @@ class Plllayer
   # All methods that perform an action should return false if the action isn't
   # applicable, and return a truthy value otherwise.
   class SinglePlayer
-    # Returns true if a track is currently loaded, i.e. either playing or
+    # Return true if a track is currently loaded, i.e. either playing or
     # paused.
     def playing?
       raise NotImplementedError
@@ -22,7 +25,8 @@ class Plllayer
 
     # Begin playing a track. The track_path should be a String representing a
     # path to an audio file. The &on_end callback should be called when the track
-    # is finished playing.
+    # is finished playing. Should raise FileNotFoundError if the audio file
+    # doesn't exist.
     def play(track_path, &on_end)
       raise NotImplementedError
     end
@@ -32,12 +36,12 @@ class Plllayer
       raise NotImplementedError
     end
 
-    # Pauses playback.
+    # Pause playback.
     def pause
       raise NotImplementedError
     end
 
-    # Resumes playback.
+    # Resume playback.
     def resume
       raise NotImplementedError
     end
@@ -59,30 +63,30 @@ class Plllayer
       end
     end
 
-    # Gets the current playback speed. The speed is a multiplier. For example,
+    # Get the current playback speed. The speed is a multiplier. For example,
     # double speed is 2 and half-speed is 0.5. Normal speed is 1.
     def speed
       raise NotImplementedError
     end
 
-    # Sets the playback speed. The speed is a multiplier. For example, for
+    # Set the playback speed. The speed is a multiplier. For example, for
     # double speed you'd set it to 2 and for half-speed you'd set it to 0.5. And
     # for normal speed: 1.
     def speed=(new_speed)
       raise NotImplementedError
     end
 
-    # Returns true if audio is muted.
+    # Return true if audio is muted.
     def muted?
       raise NotImplementedError
     end
 
-    # Mutes the audio player.
+    # Mute the audio player.
     def mute
       raise NotImplementedError
     end
 
-    # Unmutes the audio player.
+    # Unmute the audio player.
     def unmute
       raise NotImplementedError
     end
@@ -92,17 +96,17 @@ class Plllayer
       raise NotImplementedError
     end
 
-    # Set the volume as a percentage. The player is automatically unmuted.
+    # Set the volume as a percentage. The player may be automatically unmuted.
     def volume=(new_volume)
       raise NotImplementedError
     end
 
-    # Returns the current time into the song, in milliseconds.
+    # Return the current time into the song, in milliseconds.
     def position
       raise NotImplementedError
     end
 
-    # Returns the length of the current track, in milliseconds.
+    # Return the length of the current track, in milliseconds.
     def track_length
       raise NotImplementedError
     end
