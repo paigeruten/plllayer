@@ -1,3 +1,5 @@
+Note: I'm currently rethinking this project a bit, so the code, the ruby gem, and this document may not be consistent with each other for a little while.
+
 # plllayer
 
 `plllayer` provides a Ruby interface to an external media player, such as `mplayer`.
