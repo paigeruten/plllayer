@@ -3,6 +3,7 @@ require "open4"
 require "plllayer/time_helpers.rb"
 require "plllayer/single_player"
 require "plllayer/single_players/mplayer"
+require "plllayer/single_players/nop"
 
 # Plllayer provides an interface to an external media player, such as mplayer. It
 # contains a playlist of tracks, which may be as simple as an Array of paths to
@@ -14,7 +15,8 @@ class Plllayer
   extend TimeHelpers
 
   SINGLE_PLAYERS = {
-    mplayer: Plllayer::SinglePlayers::MPlayer
+    mplayer: Plllayer::SinglePlayers::MPlayer,
+    nop: Plllayer::SinglePlayers::Nop
   }
 
   attr_reader :repeat_mode
