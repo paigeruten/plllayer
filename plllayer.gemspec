@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
     s.add_runtime_dependency gem_name
   end
 
-  %w(rake).each do |gem_name|
+  %w(rake rspec).each do |gem_name|
     s.add_development_dependency gem_name
   end
 end

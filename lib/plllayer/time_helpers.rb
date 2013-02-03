@@ -4,6 +4,8 @@ class Plllayer
     # "1:03:56.555". The only option is :include_milliseconds, true by default. If
     # false, milliseconds won't be included in the formatted string.
     def format_time(milliseconds, options = {})
+      raise ArgumentError, "can't format negative time" if milliseconds < 0
+
       ms = milliseconds % 1000
       seconds = (milliseconds / 1000) % 60
       minutes = (milliseconds / 60000) % 60
@@ -25,8 +27,12 @@ class Plllayer
     # Helper method to parse a string like "1:03:56.555" and return the number of
     # milliseconds that time length represents.
     def parse_time(string)
-      parts = string.split(":").map(&:to_f)
-      parts = [0] + parts if parts.length == 2
+      parts = string.split(":", -1).map(&:to_f)
+
+      raise ArgumentError, "too many parts" if parts.length > 3
+      raise ArgumentError, "can't parse negative numbers" if parts.any? { |x| x < 0 }
+
+      parts.unshift(0) until parts.length == 3
       hours, minutes, seconds = parts
       seconds = hours * 3600 + minutes * 60 + seconds
       milliseconds = seconds * 1000
