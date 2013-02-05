@@ -6,22 +6,26 @@ It takes a playlist to play (which may just be an `Array` of `String`s containin
 
 ## Install
 
-    $ gem install plllayer
+```bash
+$ gem install plllayer
+```
 
 ## Example
 
 Here's how to play your music library in random order:
 
-    $ irb
-    irb> require "plllayer"
-      => true
-    irb> player = Plllayer.new(Dir["Music/**/*.{mp3,m4a,ogg}"])
-      => #<Plllayer: ... >
-    irb> player.shuffle
-      => true
-    irb> player.play
-      => true
-    irb>
+```bash
+$ irb
+irb> require "plllayer"
+  => true
+irb> player = Plllayer.new(Dir["Music/**/*.{mp3,m4a,ogg}"])
+  => #<Plllayer: ... >
+irb> player.shuffle
+  => true
+irb> player.play
+  => true
+irb>
+```
 
 Then, while it's playing, you can type `player.track` to see what song it's playing, `player.skip` to skip to the next song, and so on.
 
@@ -29,12 +33,16 @@ Then, while it's playing, you can type `player.track` to see what song it's play
 
 Make a `Plllayer` like this:
 
-    player = Plllayer.new
+```ruby
+player = Plllayer.new
+```
 
 This initializes a `Plllayer` with an empty playlist, and will use whatever external audio player is available on the system. You can also pass in an initial playlist, or specify what external audio player you want to use:
 
-    player = Plllayer.new(playlist)
-    player = Plllayer.new(external_player: :mplayer)
+```ruby
+player = Plllayer.new(playlist)
+player = Plllayer.new(external_player: :mplayer)
+```
 
 Only `mplayer` is supported at the moment.
 
@@ -46,31 +54,41 @@ A singleton playlist, with only one track, doesn't need to be in an `Array`. Tha
 
 To tell the `Plllayer` what playlist to play, either initialize the `Plllayer` with the playlist or use `Plllayer#append`:
 
-    player = Plllayer.new
-    player.append(playlist)
-    player << more_tracks    # the << operator is an alias for append
+```ruby
+player = Plllayer.new
+player.append(playlist)
+player << more_tracks    # the << operator is an alias for append
+```
 
 The playlist can be accessed by `Plllayer#playlist`.
 
 The playlist can be shuffled using `Plllayer#shuffle`:
 
-    player.shuffle
+```ruby
+player.shuffle
+```
 
 If one of the tracks is currently playing, it will be kept at the top of the playlist while the rest of the tracks will be shuffled.
 
 The playlist can also be sorted:
 
-    player.sort
+```ruby
+player.sort
+```
 
 This delegates to Ruby's `Array#sort`, which sorts the tracks using their `<=>` method. This also means you can pass a block to compare tracks by, like this:
 
-    player.sort { |a, b| [a.artist, a.album, a.track_number] <=> [b.artist, b.album, b.track_number] }
+```ruby
+player.sort { |a, b| [a.artist, a.album, a.track_number] <=> [b.artist, b.album, b.track_number] }
+```
 
 This is safe to do when a track is currently playing, and then the next track that plays will be whatever comes next in the sorted playlist.
 
 Lastly, the player's playlist can be reset to an empty playlist using `Plllayer#clear`:
 
-    player.clear
+```ruby
+player.clear
+```
 
 This stops playback if it's currently playing.
 
