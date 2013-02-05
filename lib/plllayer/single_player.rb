@@ -2,6 +2,9 @@ class Plllayer
   # Raise this exception when the file at the given track path doesn't exist.
   FileNotFoundError = Class.new(ArgumentError)
 
+  # Raise this one when the file can't be played for whatever reason
+  InvalidAudioFileError = Class.new(ArgumentError)
+
   # A SinglePlayer takes care of playing a single track, and controlling the
   # playback with commands like pause, resume, seek, and so on. It probably
   # starts an external audio player process to do this job. This class is an

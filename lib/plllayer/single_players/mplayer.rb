@@ -37,8 +37,10 @@ class Plllayer
 
         # This should skip past mplayer's initial lines of output so we can
         # start reading its replies to our commands.
-        until @stdout.gets["playback"]
-        end
+        begin
+          line = @stdout.gets
+          raise InvalidAudioFileError, "file '#{track_path}' isn't a valid audio file" if line.nil?
+        end until line.chomp == "Starting playback..."
 
         @paused = false
         @track_path = track_path
@@ -46,7 +48,9 @@ class Plllayer
         # Persist the previous speed, volume, and mute properties into this
         # process.
         self.speed = @speed
+        muted = @muted
         self.volume = @volume
+        @muted = muted
         mute if @muted
 
         # Start a thread that waits for the mplayer process to end, then calls
@@ -61,11 +65,17 @@ class Plllayer
           on_end.call
         end
 
+        at_exit { stop }
+
         true
       end
 
       def stop
         _quit
+      end
+
+      def paused?
+        @paused
       end
 
       def pause
@@ -148,6 +158,14 @@ class Plllayer
         answer ? (answer.to_f * 1000).to_i : false
       end
 
+      def log_start!
+        @log = true
+      end
+
+      def log_stop!
+        @log = false
+      end
+
       private
 
       # Issue a command to mplayer through the slave protocol. False is returned
@@ -169,12 +187,15 @@ class Plllayer
 
           # Send the command to mplayer.
           @stdin.puts cmd
+          File.open("log", "a") { |f| f << cmd << "\n" } if @log
 
           if options[:expect_answer]
             # Read lines of output from mplayer until we get an actual message.
             answer = "\n"
             while answer == "\n"
-              answer = @stdout.gets.sub("\e[A\r\e[K", "")
+              answer = @stdout.gets
+              File.open("log", "a") { |f| f << answer } if @log
+              answer.sub! "\e[A\r\e[K", ""
               answer = "\n" if options[:expect_answer].is_a?(Regexp) && answer !~ options[:expect_answer]
             end
 

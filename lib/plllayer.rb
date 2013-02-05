@@ -49,9 +49,6 @@ class Plllayer
     @paused = false
     @playing = false
     @repeat_mode = nil
-
-    # Make sure the music stops playing once the Ruby script is exited.
-    at_exit { stop }
   end
 
   # Append tracks to the playlist. Can be done while the playlist is playing.
