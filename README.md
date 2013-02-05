@@ -8,6 +8,22 @@ It takes a playlist to play (which may just be an `Array` of `String`s containin
 
     $ gem install plllayer
 
+## Example
+
+Here's how to play your music library in random order:
+
+    $ irb
+    irb> require "plllayer"
+      => true
+    irb> player = Plllayer.new(Dir["Music/**/*.{mp3,m4a,ogg}"])
+      => #<Plllayer: ... >
+    irb> player.shuffle
+      => true
+    irb> player.play
+      => true
+
+Then, while it's playing, you can type `player.track_path` to see what song it's playing, `player.skip` to skip to the next song, and so on.
+
 ## Usage
 
 Make a `Plllayer` like this:
