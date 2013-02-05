@@ -21,8 +21,9 @@ Here's how to play your music library in random order:
       => true
     irb> player.play
       => true
+    irb>
 
-Then, while it's playing, you can type `player.track_path` to see what song it's playing, `player.skip` to skip to the next song, and so on.
+Then, while it's playing, you can type `player.track` to see what song it's playing, `player.skip` to skip to the next song, and so on.
 
 ## Usage
 
