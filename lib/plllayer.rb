@@ -1,6 +1,8 @@
 require "open4"
 
-require "plllayer/time_helpers.rb"
+require "plllayer/time_helpers"
+require "plllayer/synchronize"
+
 require "plllayer/single_player"
 require "plllayer/single_players/mplayer"
 require "plllayer/single_players/nop"
@@ -49,6 +51,8 @@ class Plllayer
     @paused = false
     @playing = false
     @repeat_mode = nil
+
+    @index_mutex = Mutex.new
   end
 
   # Append tracks to the playlist. Can be done while the playlist is playing.
@@ -57,8 +61,8 @@ class Plllayer
   # An ArgumentError is raised when you try to pass a non-track.
   #
   # This method is aliased as the << operator.
-  def append(tracks)
-    tracks = Array(tracks)
+  def append(*tracks)
+    tracks = tracks.flatten
     tracks.each do |track|
       if !track.is_a?(String) && !track.respond_to?(:location)
         raise ArgumentError, "a #{track.class} is not a track (try adding a #location method)"
@@ -67,7 +71,73 @@ class Plllayer
     @playlist += tracks
     @playlist.dup
   end
+  synchronize :append, :@index_mutex
   alias :<< :append
+
+  # Insert one or more tracks in the playlist, right after the currently-playing
+  # track. If no track is playing, insert to the head of the playlist.
+  def insert(*tracks)
+    after = @index || -1
+    _unsynchronized_insert_at(after + 1, *tracks)
+    @playlist.dup
+  end
+  synchronize :insert, :@index_mutex
+
+  # Insert one or more tracks anywhere in the playlist. A negative index may be
+  # given to refer to the end of the playlist.
+  def insert_at(index, *tracks)
+    index = @playlist.length + index + 1 if index < 0
+    unless (0..@playlist.length).include? index
+      raise IndexError, "index is out of range"
+    end
+    @playlist.insert(index, *tracks)
+    @index += tracks.length if @index && index < @index
+    @playlist.dup
+  end
+  synchronize :insert_at, :@index_mutex
+
+  # Remove one or more tracks from the playlist by value. If the currently-playing
+  # track is removed, it will start playing the next track in the playlist.
+  def remove(*tracks)
+    n = nil
+    n = tracks.pop if tracks.last.is_a?(Fixnum)
+    index = 0
+    current_track_removed = false
+    @playlist = @playlist.inject([]) do |playlist, track|
+      if tracks.include?(track) && (n.nil? || n > 0)
+        n &&= n - 1
+        @index -= 1 if @index && index < @index
+        current_track_removed = true if index == @index
+      else
+        playlist << track
+      end
+      index += 1
+      playlist
+    end
+    _unsynchronized_change_track(0) if current_track_removed
+    @playlist.dup
+  end
+  synchronize :remove, :@index_mutex
+
+  # Remove one or more tracks from the playlist at a particular index. A negative
+  # index may be given to refer to the end of the playlist. If the currently-playing
+  # track is removed, it will start playing the next track in the playlist.
+  def remove_at(index, n = 1)
+    index = @playlist.length + index if index < 0
+    if @playlist.empty? || index < 0 || index + n > @playlist.length
+      raise IndexError, "index is out of range"
+    end
+    @playlist.slice!(index, n)
+    if @index && @index > index
+      if @index < index + n
+        _unsynchronized_change_track(index - @index)
+      else
+        @index -= n
+      end
+    end
+    @playlist.dup
+  end
+  synchronize :remove_at, :@index_mutex
 
   # Returns a copy of the playlist.
   def playlist
@@ -142,6 +212,7 @@ class Plllayer
       false
     end
   end
+  synchronize :stop, :@index_mutex
 
   # Pause playback.
   def pause
@@ -342,9 +413,6 @@ class Plllayer
 
   def change_track(by = 1, options = {})
     if playing?
-      if options[:auto] && track.respond_to?(:increment_play_count)
-        track.increment_play_count
-      end
       @index += by
       if @repeat_mode
         case @repeat_mode
@@ -358,13 +426,14 @@ class Plllayer
         @single_player.stop if paused? && @single_player.active?
         play_track if not paused?
       else
-        stop
+        _unsynchronized_stop
       end
       true
     else
       false
     end
   end
+  synchronize :change_track, :@index_mutex
 
   def play_track
     @single_player.play(track_path) do

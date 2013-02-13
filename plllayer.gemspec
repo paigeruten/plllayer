@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "plllayer"
-  s.version = "0.0.3"
-  s.date = "2013-02-05"
+  s.version = "0.0.4"
+  s.date = "2013-02-12"
   s.summary = "An audio playback library for Ruby."
   s.description = "plllayer is an audio playback library for Ruby. It is a Ruby interface to some external media player, such as mplayer."
   s.author = "Jeremy Ruten"
@@ -10,8 +10,9 @@ Gem::Specification.new do |s|
   s.license = "MIT"
   s.required_ruby_version = ">= 1.9.2"
 
-  s.files = ["Gemfile", "Gemfile.lock", "LICENSE", "plllayer.gemspec"]
+  s.files = ["Rakefile", "Gemfile", "Gemfile.lock", "LICENSE", "plllayer.gemspec", "README.md"]
   s.files += Dir["lib/**/*.rb"]
+  s.files += Dir["spec/**/*.{rb,mp3}"]
 
   %w(bundler open4).each do |gem_name|
     s.add_runtime_dependency gem_name
